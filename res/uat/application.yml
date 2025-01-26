@@ -1,0 +1,20 @@
+log_level: info
+
+ip: 0.0.0.0
+port: 8510
+
+assistant_pwd: needle_assistant_uat
+
+username: needle_assistant
+password: 446c7e65033389f2aa62ffc16ed51c218260e2bfb1131fc68a40dca9e125e20c
+
+api_key: 0b29f1dccba4f54c3fef9fdd3680cfd741e0a940055290b60f5e8ddfb2e89e58f73631cb572ce515ad19020c29f3ccaaed7645f7047d08239bb07ff01769dd7a
+
+origins:
+  - http://localhost
+  - http://localhost:8080
+  - http://185.199.110.153
+  - http://185.199.110.153:8080
+  - https://seekneedle.github.io
+
+db_url: sqlite:///res/uat/example.db
