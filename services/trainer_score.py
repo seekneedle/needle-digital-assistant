@@ -15,7 +15,8 @@ class TrainerScoreResponse(BaseModel):
 
 
 def get_prompt(context):
-    return f'''下面有一段通话内容，请阅读通话内容，并按照提供的评分规则对通话内容进行打分。
+    return f'''下面有一段通话内容，请阅读通话内容，并按照提供的评分规则对客服通话内容进行打分。
+其中user是客服，assistant是客户。
 
 通话内容：
 {context}
