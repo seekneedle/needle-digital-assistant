@@ -2,6 +2,7 @@ from data.database import TableModel, connect_db
 from sqlalchemy import Column, Integer, String
 import logging
 import os
+import sys
 from datetime import datetime
 from utils.config import config
 
@@ -45,6 +46,28 @@ def get_log():
 
 log = get_log()
 
+    # Create a custom handler that writes to stderr
+class StderrHandler(logging.StreamHandler):
+    def __init__(self):
+        super().__init__(sys.stderr)
+
+    def format(self, record):
+        # Customize the log format if needed
+        return f"{record.levelname}: {record.getMessage()}"
+def get_log2():
+    # Configure logging
+    logger = logging.getLogger(__name__)
+    logger.handlers.clear()
+    logger.setLevel(logging.INFO)
+
+    # Add the custom handler
+    handler = StderrHandler()
+    logger.addHandler(handler)
+    logger.propagate = False
+
+    return logger
+
+log2 = get_log2()
 
 if __name__ == '__main__':
     connect_db()

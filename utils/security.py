@@ -7,8 +7,8 @@ from utils.config import config
 
 
 # Set environment with your own password
-needle_pwd = os.getenv(config['assistant_pwd'])
-
+#needle_pwd = os.getenv(config['assistant_pwd'])
+needle_pwd = config['assistant_pwd']
 def sha256_encode(data):
     hash_object = hashlib.sha256()
     hash_object.update(data.encode('utf-8'))

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Request
 import traceback
-
+from utils.config import config
 from server.auth import check_permission
 
-from utils.log import log
+from utils.log import log2, log
 from services.trainer import trainer, TrainerRequest
 from services.trainer_score import trainer_score, TrainerScoreRequest
 
@@ -17,6 +17,7 @@ store_router = APIRouter(prefix='/assistant', dependencies=[Depends(check_permis
 # 1. trainer聊天
 @store_router.post('/trainer')
 async def assistant_trainer(request: Request, trainer_request: TrainerRequest):
+    log.info(f'incoming request: {trainer_request}')
     try:
         async def event_stream():
             async for event in trainer(trainer_request):
