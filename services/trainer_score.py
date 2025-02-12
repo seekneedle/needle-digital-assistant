@@ -84,7 +84,8 @@ async def trainer_score(request: TrainerScoreRequest):
             delta_content = chunk.choices[0].delta.content or ""
             response_content += delta_content
             response = SuccessResponse(data=TrainerScoreResponse(content=response_content)).model_dump_json()
-            yield f"data: {response}\n\n"
+            #yield f"data: {response}\n\n"
     
+    yield f"data: {response}\n\n"
     # Save messages to file after complete response is generated
     save_messages_to_file(request.messages, response_content)
