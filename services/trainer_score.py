@@ -4,6 +4,9 @@ from typing import List
 from utils.security import decrypt
 from utils.config import config
 from server.response import SuccessResponse
+import json
+from datetime import datetime
+import os
 
 
 class TrainerScoreRequest(BaseModel):
@@ -29,6 +32,34 @@ def get_prompt(context):
 请输出最后的评分，涉及到的通话录音中扣分的句子以及触及的扣分项目中的句子。'''
 
 
+def save_messages_to_file(messages: List[object], response: str):
+    """
+    Save request messages and AI response to a JSON file with datetime-based filename.
+    
+    Args:
+        messages (List[object]): List of message objects to save
+        response (str): AI response to save
+    """
+    # Ensure a logs directory exists
+    logs_dir = os.path.join(os.path.dirname(__file__), '..', 'output', 'trainer_score')
+    os.makedirs(logs_dir, exist_ok=True)
+    
+    # Generate filename with current datetime
+    filename = datetime.now().strftime("%Y%m%d_%H%M%S_%f.json")
+    filepath = os.path.join(logs_dir, filename)
+    
+    # Prepare data to save
+    data_to_save = {
+        "timestamp": datetime.now().isoformat(),
+        "request_messages": messages,
+        "ai_response": response
+    }
+    
+    # Write to file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data_to_save, f, ensure_ascii=False, indent=2)
+
+
 async def trainer_score(request: TrainerScoreRequest):
     content = get_prompt(request.messages)
     messages = [{'role': 'user', 'content': content}]
@@ -42,7 +73,13 @@ async def trainer_score(request: TrainerScoreRequest):
         stream=True,
         stream_options={"include_usage": True}
     )
+    response_content = ""
     for chunk in completion:
         if len(chunk.choices) > 0:
-            response = SuccessResponse(data=TrainerScoreResponse(content=chunk.choices[0].delta.content)).model_dump_json()
+            delta_content = chunk.choices[0].delta.content or ""
+            response_content += delta_content
+            response = SuccessResponse(data=TrainerScoreResponse(content=response_content)).model_dump_json()
             yield f"data: {response}\n\n"
+    
+    # Save messages to file after complete response is generated
+    save_messages_to_file(request.messages, response_content)
