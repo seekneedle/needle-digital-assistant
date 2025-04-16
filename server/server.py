@@ -3,6 +3,7 @@ from utils.config import config
 from fastapi import FastAPI
 from server.assistant_router import store_router
 from fastapi.middleware.cors import CORSMiddleware
+from utils.log import log
 
 
 app = FastAPI()
@@ -22,4 +23,6 @@ app.add_middleware(
 def start_server():
     ip = config['ip']
     port = config['port']
-    uvicorn.run("server.server:app", host=ip, port=port, reload=True, workers=1)
+    if_reload = False
+    log.info(f'uvicorn.run: server.server:{app}, host={ip}, port={port}, reload={if_reload}, workers=1')
+    uvicorn.run("server.server:app", host=ip, port=port, reload=if_reload, workers=1)
