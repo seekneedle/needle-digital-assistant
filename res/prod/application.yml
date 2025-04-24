@@ -3,12 +3,12 @@ log_level: info
 ip: 0.0.0.0
 port: 8501
 
-assistant_pwd: needle_assistant_prod
+assistant_pwd: 3QSvAzRoX3qbjNUw
 
 username: needle_assistant
 password: 92057e3fe67e15de3e04d8f0b6fbf18fcedfd1446277c69b57df0642acbc884d
 
-api_key: ec5601655ebccb4307b796a0c4e638fe3b1644ef5ffe11f542f20135ca15d270874803b1e59cbd098b75b82ef9196104b2fd22f2029f0c64011d921914792408
+api_key: bd58f3f31e537c28b3da2bfebefdaaa4d75cc5ee023f7b370720dafefcb7a363b85f34636e9e4f3b69b7311949f296ef4e2349a422f6efce47f2a1a732687a23
 
 origins:
   - http://localhost
