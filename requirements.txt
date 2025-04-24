@@ -4,3 +4,4 @@ pydantic==2.9.2
 sqlalchemy==2.0.36
 alibabacloud_bailian20231229==1.11.2
 behave==1.2.6
+openai==1.76.0

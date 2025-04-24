@@ -3,7 +3,7 @@ import traceback
 from utils.config import config
 from server.auth import check_permission
 
-from utils.log import log2, log
+from utils.log import log
 from services.trainer import trainer, TrainerRequest
 from services.trainer_score import trainer_score, TrainerScoreRequest
 
