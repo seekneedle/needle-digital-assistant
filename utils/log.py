@@ -29,6 +29,8 @@ def get_log():
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
+    format_str = '%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d:%(funcName)s] - %(message)s'
+
     level = logging.INFO if config['log_level'] == 'info' else logging.DEBUG
 
     # 创建一个logger
@@ -43,12 +45,12 @@ def get_log():
         backupCount=7,  # 保留最近7天的日志
         encoding='utf-8'
     )
-    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    file_handler.setFormatter(logging.Formatter(format_str))
 
     # 添加自定义的日志处理器
     db_handler = DatabaseLogHandler()
     db_handler.setLevel(level)
-    db_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    db_handler.setFormatter(logging.Formatter(format_str))
 
     # 将处理器添加到logger
     logger.addHandler(file_handler)

@@ -22,4 +22,4 @@ app.add_middleware(
 def start_server():
     ip = config['ip']
     port = config['port']
-    uvicorn.run("server.server:app", host=ip, port=port, reload=True, workers=1)
+    uvicorn.run("server.server:app", host=ip, port=port, reload=False, workers=1)
