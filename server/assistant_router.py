@@ -6,7 +6,7 @@ from server.auth import check_permission
 
 from utils.log import log
 from services.trainer import trainer, TrainerRequest
-from services.trainer_score import trainer_score, TrainerScoreRequest
+from services.trainer_scoring import trainer_score, TrainerScoreRequest
 from services.task import get_task_id, AssistantRequest, AssistantTaskResponse
 from services.text import get_text_message
 from fastapi.responses import StreamingResponse
@@ -85,3 +85,12 @@ async def textMessage(request: Request, task_request: TaskRequest):
         log.error(
             f'Exception for /textMessage, task_id: {task_request.taskId}, e: {e}, trace: {trace_info}')
         return FailResponse(error=str(e))
+
+
+# 2. trainer 评分，新接口
+@store_router.post('/trainerScore')
+async def assistant_trainer_score_new(request: Request, trainer_score_request: TrainerScoreRequest):
+    log.info(f'/trainerScore request received: {trainer_score_request}')
+    res = await trainer_score(trainer_score_request)
+    log.info(f'/trainerScore response: {res}')
+    return res
