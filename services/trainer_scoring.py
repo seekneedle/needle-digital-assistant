@@ -64,38 +64,39 @@ def to_prompt(role, context):
     region_example = role.get('region_example', '"行程中有没有故宫周边景点？"')
 
     evals = {
-        '使用标准话术': '是否包含开场白（如“您好，欢迎咨询众信旅游”）和结束语（如“感谢您的咨询”）',
-        '言论适当': '检测是否使用不礼貌用语（如“你不懂”）或泄露公司机密。',
-        '问题回答合理': '回答是否符合场景需求。',
-        '成交转化能力': '是否成功引导客户下单（如“您是否需要立即预订？”）。'
+        '使用标准话术': '是否包含标准开场白（如“您好，欢迎咨询众信旅游”）和结束语（如“感谢您的咨询”）',
+        '言论适当': '检测是否使用不礼貌用语（如“你不懂”、“你这人怎么这么啰嗦”之类的）或泄露公司秘密。',
+        '问题回答合理': '回答是否符合场景需求',
+        '成交转化能力': '是否积极引导顾客下单，如询问顾客是否要立即预订，或结尾时要求加顾客微信或电话号码以便后续联系，或明确跟顾客说次日或稍晚点再电话联系，等等'
     }
 
     prompt = f'''
         有一段对话内容，其中 user 是旅游行业的客服人员，assistant 是前来咨询旅游信息的顾客。
-        请阅读对话内容，并按照提供的评分维度和规则，对客服人员的服务水平打分。
+        请阅读对话内容，并按照提供的评分维度和规则，对客服人员（user）的服务水平打分。
 
         通话内容：
         {context}
 
-    # 顾客人设
-    [基础信息]
-    难度级别：{level}
-    性格特征：{personality}（示例：{personality_example}）
-    核心需求：{demand}（示例：{demand_example}）
-    身份背景：{background}（示例：{background_example}）
-    地域特征：{region}（示例：{region_example}）
+        # 顾客人设
+        [基础信息]
+        难度级别：{level}
+        性格特征：{personality}（示例：{personality_example}）
+        核心需求：{demand}（示例：{demand_example}）
+        身份背景：{background}（示例：{background_example}）
+        地域特征：{region}（示例：{region_example}）
 
-    # 评分维度和规则
-    {evals}
-    
-    # 返回结果
-    返回 json 对象，其中有且只有以下字段：
-    scores，类型为 array[dict]，对评分规则中指定的每个维度分别打分，范围为 0 到 100。
-      其中，每个评分维度对应 array 中的一个元素，该元素类型是 dict，有三个字段：eval（str 类型，对应评分维度），score（整数类型，打分）和 reason（str 类型，这样打分的理由）。
-    summary，类型为 str，对该客服人员（user）的表现做整体评价。
-    tags，类型为 array[str]，给该客服人员（user）打若干标签，如 ["熟悉业务”, "善于沟通"] 等。
-'''
+        # 评分维度和规则
+        {evals}
+
+        # 返回结果
+        返回 json 对象，其中有且只有以下字段：
+        scores，类型为 array[dict]，对评分规则中指定的每个维度分别打分，范围为 0 到 100。
+          其中，每个评分维度对应 array 中的一个元素，该元素类型是 dict，有三个字段：eval（str 类型，对应评分维度），score（整数类型，打分）和 reason（str 类型，这样打分的理由）。
+        summary，类型为 str，对该客服人员（user）的表现做整体评价。
+        tags，类型为 array[str]，给该客服人员（user）打若干标签，如 ["熟悉业务”, "善于沟通"] 等。
+    '''
     return prompt
+
     # return f'''
     #     下面有一段通话内容，请阅读通话内容，并按照提供的评分规则对客服通话内容进行打分。
     #     其中user是客服，assistant是客户。
@@ -125,7 +126,7 @@ async def trainer_score(request: TrainerScoreRequest):
     messages = [{'role': 'user', 'content': content}]
     log.info(f'score(): to call qwen: __{messages}__')
 
-    response = llm.qwen_call(messages, 'json_object', 'mock_task_id', 'score', 'qwen-turbo')
+    response = llm.qwen_call(messages, 'json_object', '', 'score', 'qwen-plus')
     log.info(f'__after llm {type(response)} {response}')
     parsed_data = json.loads(response)
     log.info(f'_json: {type(parsed_data)}, {parsed_data}')

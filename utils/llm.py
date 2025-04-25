@@ -25,7 +25,7 @@ def qwen_call(messages, return_type: str, task_id: str, job_name: str, model_nam
             response_format={'type': return_type}
         )
         log.info(f'{task_id} {model_name} {job_name} done, cost {datetime.now() - t0}')
-        log.info(f'{task_id} {model_name} {job_name} usage: {completion.usage}')
+        log.info(f'{task_id} {model_name} {job_name} request_id: {completion.id}, usage: {completion.usage}')
         return completion.choices[0].message.content
     except APIError as e:
         log.info(f'{task_id} {model_name} {job_name} APIError: {e.status_code}, {e.code}, {e.message}')
@@ -40,7 +40,7 @@ def qwen_stream_call(messages, queue, model_name: str):
         model=model_name,
         messages=messages,
         stream=True,
-        stream_options={'include_usage': True} # 不需要得到 token 使用情况统计
+        stream_options={'include_usage': True} # 得到 token 使用情况统计
     ) # 貌似是第一个 chunk 返回时才返回
     for chunk in completion:
         if not chunk.choices:
@@ -52,12 +52,12 @@ def qwen_stream_call(messages, queue, model_name: str):
 
 # wrapper for qwen_stream_call()
 async def stream_generate_ex(messages, task_id: str, job_name: str, model_name: str):
-    log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER before calling qwen')
+    # log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER before calling qwen')
     queue = multiprocessing.Queue()
     process = multiprocessing.Process(target=qwen_stream_call, args=(messages, queue, model_name))
-    log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER before process.start()')
+    # log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER before process.start()')
     process.start()
-    log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER after process.start()')
+    # log.info(f'stream_call {task_id} {model_name} {job_name} WRAPPER after process.start()')
 
     try:
         cnt = 0

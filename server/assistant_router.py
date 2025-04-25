@@ -19,7 +19,7 @@ store_router = APIRouter(prefix='/assistant', dependencies=[Depends(check_permis
 # 1. trainer聊天
 @store_router.post('/trainer')
 async def assistant_trainer(request: Request, trainer_request: TrainerRequest):
-    log.info(f'incoming request: {trainer_request}')
+    log.info(f'/trainer incoming request: {trainer_request}')
     try:
         async def event_stream():
             async for event in trainer(trainer_request):
@@ -53,7 +53,7 @@ async def assistant_trainer_score(request: Request, trainer_score_request: Train
 # 获取task_id
 @store_router.post('/getTaskId')
 async def getTaskId(request: AssistantRequest):
-    log.info(f'getTaskId: {request}')
+    log.info(f'/getTaskId incoming request: {request}')
     task_id = get_task_id(request)
     log.info(f"/getTaskId, task_id: {task_id}, request: {request}")
     return SuccessResponse(data=AssistantTaskResponse(taskId=task_id))
@@ -66,6 +66,7 @@ class TaskRequest(BaseModel):
 # 获取文本流式输出
 @store_router.post('/textMessage')
 async def textMessage(request: Request, task_request: TaskRequest):
+    log.info(f'/textMessage incoming request: {task_request}')
     try:
         async def event_stream():
             buffer = []
@@ -90,7 +91,7 @@ async def textMessage(request: Request, task_request: TaskRequest):
 # 2. trainer 评分，新接口
 @store_router.post('/trainerScore')
 async def assistant_trainer_score_new(request: Request, trainer_score_request: TrainerScoreRequest):
-    log.info(f'/trainerScore request received: {trainer_score_request}')
+    log.info(f'/trainerScore incoming request: {trainer_score_request}')
     res = await trainer_score(trainer_score_request)
     log.info(f'/trainerScore response: {res}')
     return res
