@@ -5,10 +5,13 @@ from cryptography.hazmat.primitives import padding
 import os
 from utils.config import config
 
-
+env = os.getenv('ENV')
+if env is None or env != 'uat':
+    env = 'prod'
+passwd_key = f'needle_assistant_{env}'
 # Set environment with your own password
-#needle_pwd = os.getenv(config['assistant_pwd'])
-needle_pwd = config['assistant_pwd']
+needle_passwd = os.getenv(passwd_key)
+
 def sha256_encode(data):
     hash_object = hashlib.sha256()
     hash_object.update(data.encode('utf-8'))
@@ -22,7 +25,7 @@ def hash_key(key_str):
     return hash_object.digest()[:32]
 
 
-def encrypt(plain_text, key_str=needle_pwd):
+def encrypt(plain_text, key_str=needle_passwd):
     key = hash_key(key_str)
     backend = default_backend()
     iv = os.urandom(16)
@@ -34,7 +37,7 @@ def encrypt(plain_text, key_str=needle_pwd):
     return (iv + encrypted_data).hex()
 
 
-def decrypt(cipher_text_hex, key_str=needle_pwd):
+def decrypt(cipher_text_hex, key_str=needle_passwd):
     key = hash_key(key_str)
     backend = default_backend()
     cipher_text = bytes.fromhex(cipher_text_hex)

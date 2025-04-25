@@ -3,8 +3,6 @@ log_level: info
 ip: 0.0.0.0
 port: 8510
 
-assistant_pwd: needle_assistant_uat
-
 username: needle_assistant
 password: 446c7e65033389f2aa62ffc16ed51c218260e2bfb1131fc68a40dca9e125e20c
 

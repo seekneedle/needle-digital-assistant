@@ -3,8 +3,6 @@ log_level: info
 ip: 0.0.0.0
 port: 8501
 
-assistant_pwd: 3QSvAzRoX3qbjNUw
-
 username: needle_assistant
 password: 92057e3fe67e15de3e04d8f0b6fbf18fcedfd1446277c69b57df0642acbc884d
 
