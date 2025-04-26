@@ -100,6 +100,6 @@ async def get_text_message(task_id):
     )
     for chunk in completion:
         if len(chunk.choices) > 0:
-            response = SuccessResponse(data=TrainerResponse(content=chunk.choices[0].delta.content)).model_dump_json()
+            response = SuccessResponse(data=TrainerResponse(content=chunk.choices[0].delta.content, stop=False)).model_dump_json()
             print(response)
             yield f"data: {response}\n\n"
