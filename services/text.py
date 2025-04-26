@@ -5,6 +5,7 @@ from utils.security import decrypt
 from utils.config import config
 from server.response import SuccessResponse
 from pydantic import BaseModel
+import json
 
 class TrainerResponse(BaseModel):
     content: str
@@ -82,10 +83,10 @@ async def get_text_message(task_id):
     messages = [
         {
             'role': 'system',
-            'content': get_prompt(assistant_entity.role)
+            'content': get_prompt(json.loads(assistant_entity.role) if assistant_entity.role else {})
         }
     ]
-    messages = messages + assistant_entity.messages
+    messages = messages + json.loads(assistant_entity.messages) if assistant_entity.messages else []
 
     client = OpenAI(
         api_key=decrypt(config['api_key']),
