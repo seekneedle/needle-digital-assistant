@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
 from data.assistant import AssistantEntity
 import uuid
 import json
 
 
 class AssistantRequest(BaseModel):
-    role: List[object]
+    role: Dict
     messages: List[object]
 
 
