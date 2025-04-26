@@ -28,7 +28,7 @@ class AssistantTaskResponse(BaseModel):
 
 def get_task_id(request: AssistantRequest):
     task_id = str(uuid.uuid4())
-    AssistantEntity.create(task_id=task_id, maxNum=request.maxNum,
+    AssistantEntity.create(task_id=task_id,
                         role=json.dumps(request.role, ensure_ascii=False, indent=4),
                         messages=json.dumps(request.messages, ensure_ascii=False, indent=4))
     return task_id
