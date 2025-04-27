@@ -1,4 +1,4 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 from data.assistant import AssistantEntity
 from utils.security import decrypt
@@ -6,10 +6,6 @@ from utils.config import config
 from server.response import SuccessResponse
 from pydantic import BaseModel
 import json
-
-class TrainerResponse(BaseModel):
-    content: str
-    stop: bool
 
 
 QUESTIONS = [
@@ -66,7 +62,6 @@ def get_prompt(role):
 4. 交互规范：
    a. 每次只提1个问题
    b. 问题需包含具体场景细节（如带宠物旅行需明确宠物品种）
-   c. 当销售人员使用结束话术时回复"[END]"
 
 # 当前对话要求
 请生成符合上述人设的客户提问，注意：
@@ -78,6 +73,51 @@ def get_prompt(role):
 
     return prompt.strip()
 
+
+TERMINATION_PROMPT = """
+请分析当前旅行咨询对话是否需要结束。判断依据：
+1. 用户已获得所有必要信息（行程/费用/住宿）
+2. 用户明确表示没有更多问题
+3. 对话轮次已达20次
+4. 问题重复率超过30%
+
+只需返回true/false，不要解释。
+当前对话（最近3轮）：
+{recent_dialog}
+"""
+
+
+async def should_terminate(messages: list) -> bool:
+    """简化版终止判断"""
+    try:
+        # 硬性条件：对话轮次>=30
+        if len([m for m in messages if m["role"] == "user"]) >= 30:
+            return True
+
+        # 智能判断
+        recent_dialog = "\n".join(
+            f"{m['role']}: {m['content']}"
+            for m in messages[-6:]  # 最近3组问答
+        )
+
+        client = AsyncOpenAI(
+            api_key=decrypt(config['api_key']),
+            base_url='https://dashscope.aliyuncs.com/compatible-mode/v1',
+        )
+        response = await client.chat.completions.create(
+            model="qwen-max",
+            messages=[{
+                "role": "system",
+                "content": TERMINATION_PROMPT.format(recent_dialog=recent_dialog)
+            }],
+            temperature=0.1
+        )
+
+        return response.choices[0].message.content.strip().lower() == "true"
+    except Exception:
+        return False
+
+
 async def get_text_message(task_id):
     assistant_entity = AssistantEntity.query_first(task_id=task_id)
     messages = [
@@ -88,18 +128,35 @@ async def get_text_message(task_id):
     ]
     messages = messages + json.loads(assistant_entity.messages) if assistant_entity.messages else []
 
-    client = OpenAI(
-        api_key=decrypt(config['api_key']),
-        base_url='https://dashscope.aliyuncs.com/compatible-mode/v1',
-    )
-    completion = client.chat.completions.create(
-        model="qwen-plus",
-        messages=messages,
-        stream=True,
-        stream_options={"include_usage": True}
-    )
-    for chunk in completion:
-        if len(chunk.choices) > 0:
-            response = SuccessResponse(data=TrainerResponse(content=chunk.choices[0].delta.content, stop=False)).model_dump_json()
-            print(response)
-            yield f"data: {response}\n\n"
+    full_response = []
+    try:
+        client = AsyncOpenAI(
+            api_key=decrypt(config['api_key']),
+            base_url='https://dashscope.aliyuncs.com/compatible-mode/v1',
+        )
+
+        completion = await client.chat.completions.create(
+            model="qwen-plus",
+            messages=messages,
+            stream=True,
+            stream_options={"include_usage": True}
+        )
+
+        # 流式传输
+        async for chunk in completion:
+            if chunk.choices and chunk.choices[0].delta.content:
+                content = chunk.choices[0].delta.content
+                full_response.append(content)
+                yield f"data: {content}\n\n"
+
+        # 完整响应后判断终止
+        if full_response:
+            assistant_response = "".join(full_response)
+            messages.append({"role": "assistant", "content": assistant_response})
+
+            if await should_terminate(messages):
+                yield "data: [END]\n\n"
+
+    finally:
+        # 不强制发送结束标记
+        pass
