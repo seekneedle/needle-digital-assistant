@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, WebSocket
 import traceback
 from utils.config import config
 from pydantic import BaseModel
@@ -9,12 +9,14 @@ from services.trainer import trainer, TrainerRequest
 from services.trainer_scoring import trainer_score, TrainerScoreRequest
 from services.task import get_task_id, AssistantRequest, AssistantTaskResponse
 from services.text import get_text_message
+from services.asr_proxy import proxy_websocket
+
 from fastapi.responses import StreamingResponse
 
 from server.response import SuccessResponse, FailResponse
 
 store_router = APIRouter(prefix='/assistant', dependencies=[Depends(check_permission)])
-
+ws_router = APIRouter(prefix='/assist')
 
 # 1. trainer聊天
 @store_router.post('/trainer')
@@ -95,3 +97,18 @@ async def assistant_trainer_score_new(request: Request, trainer_score_request: T
     res = await trainer_score(trainer_score_request)
     log.info(f'/trainerScore response: {res}')
     return res
+
+# asr 语音转文字，转发
+@ws_router.websocket('/ws_asr')
+async def websocket_endpoint(websocket: WebSocket):
+    log.info(f'/ws_asr incoming request from {websocket.client}')
+    try:
+        await websocket.accept()
+        # log.info('WebSocket connection accepted successfully')
+        await proxy_websocket(websocket)
+    except Exception as e:
+        log.error(f'WebSocket connection error: {type(e).__name__} - {e}')
+        try:
+            await websocket.close(code=1011)  # Internal server error
+        except Exception:
+            pass

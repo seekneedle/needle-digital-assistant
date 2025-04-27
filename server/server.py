@@ -1,13 +1,14 @@
 import uvicorn
 from utils.config import config
 from fastapi import FastAPI
-from server.assistant_router import store_router
+from server.assistant_router import store_router, ws_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 # 包含路由
 app.include_router(store_router)
+app.include_router(ws_router)
 
 
 app.add_middleware(
