@@ -3,6 +3,7 @@ import traceback
 from utils.config import config
 from pydantic import BaseModel
 from server.auth import check_permission
+import sys
 
 from utils.log import log
 from services.trainer import trainer, TrainerRequest
@@ -79,11 +80,16 @@ async def textMessage(request: Request, task_request: TaskRequest):
                         break
                     buffer.append(event.strip())
                     yield f"data: {event}\n\n"
+                    sys.stdout.flush()
             finally:
                 merged_content = "".join(buffer)  # 合并所有事件内容
                 log.info(f"/textMessage, task_id: {task_request.taskId}, text message: {merged_content}")
 
-        return StreamingResponse(event_stream(), media_type='text/event-stream')
+        return StreamingResponse(event_stream(), media_type='text/event-stream', headers={
+            "Cache-Control": "no-cache",        # 禁用客户端缓存
+            "X-Accel-Buffering": "no",          # 禁用Nginx等代理缓冲
+            "Connection": "keep-alive"          # 保持长连接
+        })
     except Exception as e:
         trace_info = traceback.format_exc()
         log.error(
