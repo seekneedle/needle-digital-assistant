@@ -78,7 +78,7 @@ async def textMessage(request: Request, task_request: TaskRequest):
                     if await request.is_disconnected():
                         break
                     buffer.append(event.strip())
-                    yield event
+                    yield f"data {event}\n\n"
             finally:
                 merged_content = "".join(buffer)  # 合并所有事件内容
                 log.info(f"/textMessage, task_id: {task_request.taskId}, text message: {merged_content}")

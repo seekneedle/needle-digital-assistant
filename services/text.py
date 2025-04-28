@@ -147,7 +147,7 @@ async def get_text_message(task_id):
             if chunk.choices and chunk.choices[0].delta.content:
                 content = chunk.choices[0].delta.content
                 full_response.append(content)
-                yield f"data: {content}\n\n"
+                yield content
 
         # 完整响应后判断终止
         if full_response:
@@ -155,7 +155,7 @@ async def get_text_message(task_id):
             messages.append({"role": "assistant", "content": assistant_response})
 
             if await should_terminate(messages):
-                yield "data: [END]\n\n"
+                yield "[END]"
 
     finally:
         # 不强制发送结束标记
