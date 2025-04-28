@@ -265,7 +265,7 @@ async def proxy_websocket(websocket, path=None):
         # Establish connection to the upstream ASR WebSocket
         upstream_ws = await websockets.connect(
             ASR_WS_URL,
-            additional_headers=token_auth(),
+            extra_headers=token_auth(),
             max_size=1000000000,  # Large max size to handle big messages
             ping_interval=20,     # Send ping every 20 seconds
             ping_timeout=20       # Timeout for ping response
