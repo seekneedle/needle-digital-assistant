@@ -6,6 +6,7 @@ from utils.config import config
 from server.response import SuccessResponse
 from pydantic import BaseModel
 import json
+from utils.log import log
 
 
 QUESTIONS = [
@@ -119,7 +120,9 @@ async def should_terminate(messages: list) -> bool:
 
 
 async def get_text_message(task_id):
+    log.info(f'get_text_message query_task: {task_id}')
     assistant_entity = AssistantEntity.query_first(task_id=task_id)
+    log.info(f'get_text_message query_task: {task_id}, role: {assistant_entity.role}, message: {assistant_entity.messages}')
     messages = [
         {
             'role': 'system',
@@ -146,6 +149,7 @@ async def get_text_message(task_id):
         async for chunk in completion:
             if chunk.choices and chunk.choices[0].delta.content:
                 content = chunk.choices[0].delta.content
+                log.info(f'get_text_message response text: {content}')
                 full_response.append(content)
                 yield content
 
