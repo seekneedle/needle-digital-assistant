@@ -10,6 +10,7 @@ from services.trainer_scoring import trainer_score, TrainerScoreRequest
 from services.task import get_task_id, AssistantRequest, AssistantTaskResponse
 from services.text import get_text_message
 from services.asr_proxy import proxy_websocket
+from services.tts_proxy import to_speech, TtsRequest
 
 from fastapi.responses import StreamingResponse
 
@@ -96,6 +97,13 @@ async def assistant_trainer_score_new(request: Request, trainer_score_request: T
     log.info(f'/trainerScore incoming request: {trainer_score_request}')
     res = await trainer_score(trainer_score_request)
     log.info(f'/trainerScore response: {res}')
+    return res
+
+@store_router.post('/tts')
+async def tts_endpoint(request: Request, tts_request: TtsRequest):
+    log.info(f'/tts incoming request: {tts_request}')
+    res = await to_speech(tts_request)
+    # log.info(f'/tts response: {res}')
     return res
 
 # asr 语音转文字，转发
