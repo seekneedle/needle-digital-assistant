@@ -87,8 +87,7 @@ async def textMessage(request: Request, task_request: TaskRequest):
 
         return StreamingResponse(event_stream(), media_type='text/event-stream', headers={
             "Cache-Control": "no-cache",        # 禁用客户端缓存
-            "X-Accel-Buffering": "no",          # 禁用Nginx等代理缓冲
-            "Connection": "keep-alive"          # 保持长连接
+            "X-Accel-Buffering": "no"          # 禁用Nginx等代理缓冲
         })
     except Exception as e:
         trace_info = traceback.format_exc()
