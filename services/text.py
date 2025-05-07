@@ -43,7 +43,7 @@ def get_prompt(role):
 性格特征：{personality}（示例：{personality_example}）
 核心需求：{demand}（示例：{demand_example}）
 身份背景：{background}（示例：{background_example}）
-地域特征：{region}（示例：{region_example}）
+客户地域：{region}（示例：{region_example}）
 
 # 对话生成规则
 1. 提问风格：
@@ -67,10 +67,11 @@ def get_prompt(role):
 # 当前对话要求
 请生成符合上述人设的客户提问，注意：
 - 问题需体现{background}身份特征
-- 融入{region}地域要素
+- 客户地域为{region}，问题要考虑客户的所在地域
 - 使用{personality}对应的语气模板
 - 请模拟一个真实的客户的对话
 - 要结合旅行场景，不要生硬的介绍自己或者旅行需求
+- 目的地可以是国内外任何城市和景点，请选择一个具体的目的地
 
 请生成问题："""
 
