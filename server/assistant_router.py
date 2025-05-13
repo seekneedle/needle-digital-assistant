@@ -98,7 +98,7 @@ async def textMessage(request: Request, task_request: TaskRequest):
 
 # 2. trainer 评分，新接口
 @store_router.post('/trainerScore')
-async def assistant_trainer_score_new(request: Request, trainer_score_request: TrainerScoreRequest):
+async def assistant_trainer_score_new(trainer_score_request: TrainerScoreRequest):
     log.info(f'/trainerScore incoming request: {trainer_score_request}')
     res = await trainer_score(trainer_score_request)
     log.info(f'/trainerScore response: {res}')
