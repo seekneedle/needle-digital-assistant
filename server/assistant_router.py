@@ -102,7 +102,7 @@ async def assistant_trainer_score_new(trainer_score_request: TrainerScoreRequest
     log.info(f'/trainerScore incoming request: {trainer_score_request}')
     res = await trainer_score(trainer_score_request)
     log.info(f'/trainerScore response: {res}')
-    return res
+    return SuccessResponse(data=res)
 
 @store_router.post('/tts')
 async def tts_endpoint(request: Request, tts_request: TtsRequest):
