@@ -46,8 +46,8 @@ CUSTOM_COMPRESSION = 0b1111
 # Configuration
 ASR_WS_URL = "wss://openspeech.bytedance.com/api/v2/asr"
 DEFAULT_CONFIG = {
-    "appid": "4823798285",
-    "token": "GmakIY6Um9DZgCQl7Rr0RJNfDukCJ8RB",
+    "appid": "7672859524",
+    "token": "RHULG8x5VBEzT_QWySZ1FPlXcerQpYPY",
     "cluster": "volcengine_streaming_common",
     "workflow": "audio_in,resample,partition,vad,fe,decode,itn,nlu_punctuate",
     "language": "zh-CN",
@@ -316,7 +316,10 @@ async def proxy_websocket(websocket, path=None):
             except Exception as e:
                 log.error(f"❌ [CLIENT→UPSTREAM] Unexpected error: {e}")
                 connection_active = False
-
+            finally:
+                logger.info(f"Send close websocket.")
+                await upstream_ws.close()
+        
         async def receive_messages():
             nonlocal connection_active
             try:

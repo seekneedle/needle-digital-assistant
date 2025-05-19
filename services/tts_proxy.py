@@ -11,8 +11,8 @@ class TtsRequest(BaseModel):
 class TtsResponse(BaseModel):
     data: str # based64 encoded
 
-appid = '4823798285'
-access_token = 'GmakIY6Um9DZgCQl7Rr0RJNfDukCJ8RB'
+appid = '7672859524'
+access_token = 'RHULG8x5VBEzT_QWySZ1FPlXcerQpYPY'
 cluster = 'volcano_tts'
 language = 'cn'
 voice_type = 'BV700_V2_streaming'
