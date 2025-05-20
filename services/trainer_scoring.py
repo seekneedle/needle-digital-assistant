@@ -13,7 +13,7 @@ from utils.security import decrypt
 from utils import llm
 
 class TrainerScoreRequest(BaseModel):
-    role: dict
+    role: str
     messages: List[object]
     # evals: List[dict]
 
@@ -52,17 +52,6 @@ def save_messages_to_file(messages: List[object], response: str):
 
 
 def to_prompt(role, context):
-    level = role['level']
-    # 提取人设维度特征（假设role字典包含这些字段）
-    personality = role.get('personality', '友好型')
-    personality_example = role.get('personality_example', '"您详细说说这个行程吧，我慢慢听"')
-    demand = role.get('demand', '基础需求型')
-    demand_example = role.get('demand_example', '"这个行程价格是多少？"')
-    background = role.get('background', '普通上班族')
-    background_example = role.get('background_example', '"我是刚毕业的大学生"')
-    region = role.get('region', '本地化需求')
-    region_example = role.get('region_example', '"行程中有没有故宫周边景点？"')
-
     evals = {
         '服务规范': '总分15分，评分结合是否包含标准开场白（如“您好，欢迎咨询众信旅游”）和结束语（如“感谢您的咨询”），是否服务态度敷衍。打分标准：0-6分：遗漏关键服务话术/用语错误；7-12分：准确使用标准话术但缺乏温度；13-15分：灵活结合标准话术与个性化服务',
         '需求洞察': '总分20分，评分结合用户需求识别、响应和引导（如“二老平时有登山习惯吗？”，或“您这次旅行预算时人均1万吗”，或"想象孩子触摸南极企鹅时的光芒，这是终身教育投资"）。打分标准：0-8分：仅回应表面需求；9-16分：封闭式问题确认基础需求；17-20分：通过客户资料深度挖掘需求',
@@ -81,11 +70,7 @@ def to_prompt(role, context):
 
         # 顾客人设
         [基础信息]
-        难度级别：{level}
-        性格特征：{personality}（示例：{personality_example}）
-        核心需求：{demand}（示例：{demand_example}）
-        身份背景：{background}（示例：{background_example}）
-        地域特征：{region}（示例：{region_example}）
+        {role}
 
         # 评分维度和规则
         {evals}
