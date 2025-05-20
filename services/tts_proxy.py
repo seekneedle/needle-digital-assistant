@@ -48,7 +48,7 @@ async def to_speech(tts_request: TtsRequest):
             'voice_type': final_voice,
             'emotion': final_emotion,
             'encoding': 'mp3',
-            'speed_ratio': 1.0,
+            'speed_ratio': tts_request.speed_ratio,
             'volume_ratio': 1.0,
             'pitch_ratio': 1.0,
         },
