@@ -42,7 +42,6 @@ NO_COMPRESSION = 0b0000
 GZIP = 0b0001
 CUSTOM_COMPRESSION = 0b1111
 
-
 # Configuration
 ASR_WS_URL = "wss://openspeech.bytedance.com/api/v2/asr"
 DEFAULT_CONFIG = {
@@ -317,7 +316,7 @@ async def proxy_websocket(websocket, path=None):
                 log.error(f"❌ [CLIENT→UPSTREAM] Unexpected error: {e}")
                 connection_active = False
             finally:
-                logger.info(f"Send close websocket.")
+                log.info(f"Send close websocket.")
                 await upstream_ws.close()
         
         async def receive_messages():
