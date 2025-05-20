@@ -5,6 +5,8 @@ import json
 # import certifi
 import gzip
 from utils.log import log
+from utils.security import decrypt
+from utils.config import config
 
 
 PROTOCOL_VERSION = 0b0001
@@ -45,8 +47,8 @@ CUSTOM_COMPRESSION = 0b1111
 # Configuration
 ASR_WS_URL = "wss://openspeech.bytedance.com/api/v2/asr"
 DEFAULT_CONFIG = {
-    "appid": "7672859524",
-    "token": "RHULG8x5VBEzT_QWySZ1FPlXcerQpYPY",
+    "appid": "1976574484",
+    "token": decrypt(config['asr_token']),
     "cluster": "volcengine_streaming_common",
     "workflow": "audio_in,resample,partition,vad,fe,decode,itn,nlu_punctuate",
     "language": "zh-CN",

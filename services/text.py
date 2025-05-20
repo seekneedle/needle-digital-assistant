@@ -23,27 +23,12 @@ QUESTIONS = [
 ]
 
 def get_prompt(role):
-    level = role['level']
-    # 提取人设维度特征（假设role字典包含这些字段）
-    personality = role.get('personality', '友好型')
-    personality_example = role.get('personality_example', '"您详细说说这个行程吧，我慢慢听"')
-    demand = role.get('demand', '基础需求型')
-    demand_example = role.get('demand_example', '"这个行程价格是多少？"')
-    background = role.get('background', '普通上班族')
-    background_example = role.get('background_example', '"我是刚毕业的大学生"')
-    region = role.get('region', '本地化需求')
-    region_example = role.get('region_example', '"行程中有没有故宫周边景点？"')
-
     prompt = f"""
 你正在扮演一个准备旅游的客户，在给众信旅行公司打电话询问旅行产品。请严格按照以下设定生成对话：
 
 # 客户人设配置
 [基础信息]
-难度级别：{level}
-性格特征：{personality}（示例：{personality_example}）
-核心需求：{demand}（示例：{demand_example}）
-身份背景：{background}（示例：{background_example}）
-客户地域：{region}（示例：{region_example}）
+{role}
 
 # 对话生成规则
 1. 提问风格：
@@ -130,7 +115,7 @@ async def get_text_message(task_id):
     messages = [
         {
             'role': 'system',
-            'content': get_prompt(json.loads(assistant_entity.role) if assistant_entity.role else {})
+            'content': get_prompt(assistant_entity.role)
         }
     ]
     messages = messages + json.loads(assistant_entity.messages) if assistant_entity.messages else []

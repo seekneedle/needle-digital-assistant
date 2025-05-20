@@ -1,18 +1,25 @@
 import json
 import uuid
+from typing import Optional
+
 import aiohttp
 from pydantic import BaseModel
 from server.response import SuccessResponse, FailResponse
 from utils.log import log
+from utils.security import decrypt
+from utils.config import config
 
 class TtsRequest(BaseModel):
+    voice_type: Optional[str] = None  # 允许空值
+    emotion: Optional[str] = None
+    speed_ratio: float = 1.0
     text: str
 
 class TtsResponse(BaseModel):
     data: str # based64 encoded
 
 appid = '7672859524'
-access_token = 'RHULG8x5VBEzT_QWySZ1FPlXcerQpYPY'
+access_token = decrypt(config['tts_token'])
 cluster = 'volcano_tts'
 language = 'cn'
 voice_type = 'BV700_V2_streaming'
@@ -22,6 +29,9 @@ host = 'openspeech.bytedance.com'
 
 async def to_speech(tts_request: TtsRequest):
     text = tts_request.text
+
+    final_voice = tts_request.voice_type.strip() if tts_request.voice_type else voice_type
+    final_emotion = tts_request.emotion.strip() if tts_request.emotion else emotion
 
     api_url = f'https://{host}/api/v1/tts'
     header = {'Authorization': f'Bearer;{access_token}'}
@@ -35,7 +45,8 @@ async def to_speech(tts_request: TtsRequest):
             'uid': '388808087185088'
         },
         'audio': {
-            'voice_type': voice_type,
+            'voice_type': final_voice,
+            'emotion': final_emotion,
             'encoding': 'mp3',
             'speed_ratio': 1.0,
             'volume_ratio': 1.0,
