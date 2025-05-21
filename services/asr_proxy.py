@@ -222,7 +222,11 @@ def auth_manipulation(message):
                 if isinstance(payload_json, dict):
                     payload_json['app']['appid'] = DEFAULT_CONFIG['appid']
                     payload_json['app']['cluster'] = DEFAULT_CONFIG['cluster']
-                    payload_json['app']['token'] = DEFAULT_CONFIG['token']
+                    # payload_json['app']['token'] = DEFAULT_CONFIG['token']
+                    shipped_token = payload_json['app']['token']
+                    if shipped_token != DEFAULT_CONFIG['token']:
+                        log.info(f'shipped token wrong:{shipped_token}. will close connection.')
+                        return None
 
                     # Convert back to JSON string and then bytes
                     modified_payload = str.encode(json.dumps(payload_json))
@@ -266,7 +270,8 @@ async def proxy_websocket(websocket, path=None):
         # Establish connection to the upstream ASR WebSocket
         upstream_ws = await websockets.connect(
             ASR_WS_URL,
-            extra_headers=token_auth(),
+            # additional_headers=token_auth(), # websockets 10.0 and above
+            extra_headers=token_auth(), # before websocket 10.0
             max_size=1000000000,  # Large max size to handle big messages
             ping_interval=20,     # Send ping every 20 seconds
             ping_timeout=20       # Timeout for ping response
@@ -288,6 +293,11 @@ async def proxy_websocket(websocket, path=None):
 
                         # Apply authentication manipulation to the message
                         client_message = auth_manipulation(client_message)
+                        if client_message is None:
+                            log.warning('[CLIENT] connection (ws) closed due to wrong token.')
+                            connection_active = False
+                            await websocket.close()
+                            break
 
                         # Log detailed message information
                         # log_message_details(client_message, prefix='[CLIENT→UPSTREAM]')
@@ -318,9 +328,9 @@ async def proxy_websocket(websocket, path=None):
                 log.error(f"❌ [CLIENT→UPSTREAM] Unexpected error: {e}")
                 connection_active = False
             finally:
-                log.info(f"Send close websocket.")
+                log.info(f'send close websocket (upstream).')
                 await upstream_ws.close()
-        
+
         async def receive_messages():
             nonlocal connection_active
             try:
