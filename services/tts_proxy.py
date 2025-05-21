@@ -12,6 +12,7 @@ from utils.config import config
 class TtsRequest(BaseModel):
     voice_type: Optional[str] = None  # 允许空值
     emotion: Optional[str] = None
+    language: Optional[str] = None
     speed_ratio: float = 1.0
     text: str
 
@@ -32,6 +33,7 @@ async def to_speech(tts_request: TtsRequest):
 
     final_voice = tts_request.voice_type.strip() if tts_request.voice_type else voice_type
     final_emotion = tts_request.emotion.strip() if tts_request.emotion else emotion
+    final_language = tts_request.language.strip() if tts_request.language else language
 
     api_url = f'https://{host}/api/v1/tts'
     header = {'Authorization': f'Bearer;{access_token}'}
@@ -51,6 +53,7 @@ async def to_speech(tts_request: TtsRequest):
             'speed_ratio': tts_request.speed_ratio,
             'volume_ratio': 1.0,
             'pitch_ratio': 1.0,
+            'language': final_language
         },
         'request': {
             'reqid': str(uuid.uuid4()),
