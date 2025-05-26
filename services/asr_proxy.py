@@ -224,7 +224,8 @@ def auth_manipulation(message):
                     payload_json['app']['cluster'] = DEFAULT_CONFIG['cluster']
                     # payload_json['app']['token'] = DEFAULT_CONFIG['token']
                     shipped_token = payload_json['app']['token']
-                    if shipped_token != DEFAULT_CONFIG['token']:
+                    asr_auth_token = decrypt(config['asr_auth_token'])
+                    if shipped_token != asr_auth_token:
                         log.info(f'shipped token wrong:{shipped_token}. will close connection.')
                         return None
 
