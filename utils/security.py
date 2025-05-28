@@ -67,7 +67,7 @@ if __name__ == '__main__':
     random_password = generate_password()
     print("Generated password:", random_password)
     #
-    cipher_text = encrypt('needle_assistant')  # Replace it with the text you need to encrypt
+    cipher_text = encrypt('MzizwIQ4ywauqkPptz01kb2i8IXLg4Ji')  # Replace it with the text you need to encrypt
     print(cipher_text)
 
     plain_text = decrypt(cipher_text)

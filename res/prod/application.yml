@@ -6,7 +6,11 @@ port: 8501
 username: needle_assistant
 password: 92057e3fe67e15de3e04d8f0b6fbf18fcedfd1446277c69b57df0642acbc884d
 
-api_key: bd58f3f31e537c28b3da2bfebefdaaa4d75cc5ee023f7b370720dafefcb7a363b85f34636e9e4f3b69b7311949f296ef4e2349a422f6efce47f2a1a732687a23
+api_key: e3e11aa6905290816f4a3a7a942ecfe94fbe26e353311bd83b3495d4bf3bbbf43f05bcf92a41bb4c08829d0ee70ea272169391137d4a355a7e3c0317b4c9abe5
+
+asr_token: 02bc038b4160371a22b66bcbceec8cbc8790731b8cc8bc6ab55909179b2487318a2b0722e3d6a82a78d9c7de2bfd9ce5c33078526d8b8e7c3f6bdd176320eec3
+asr_auth_token: 4a6b89e63ef48b0bb47d537cc29d845cc7530bbe53b6a041901602d6c83be5a352ec749f2feb79930421bef15b9def86
+tts_token: 02bc038b4160371a22b66bcbceec8cbc8790731b8cc8bc6ab55909179b2487318a2b0722e3d6a82a78d9c7de2bfd9ce5c33078526d8b8e7c3f6bdd176320eec3
 
 origins:
   - http://localhost
@@ -15,4 +19,4 @@ origins:
   - http://185.199.110.153:8080
   - https://seekneedle.github.io
 
-db_url: sqlite:///res/prod/example.db
+db_url: sqlite:///output/prod.db
