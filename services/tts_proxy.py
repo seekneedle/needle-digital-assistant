@@ -37,6 +37,7 @@ async def to_speech(tts_request: TtsRequest):
 
     api_url = f'https://{host}/api/v1/tts'
     header = {'Authorization': f'Bearer;{access_token}'}
+    reqid = str(uuid.uuid4())
     request_json = {
         'app': {
             'appid': appid,
@@ -56,7 +57,7 @@ async def to_speech(tts_request: TtsRequest):
             'language': final_language
         },
         'request': {
-            'reqid': str(uuid.uuid4()),
+            'reqid': reqid,
             'text': text,
             'text_type': 'plain',
             'operation': 'query',
@@ -64,12 +65,15 @@ async def to_speech(tts_request: TtsRequest):
             'frontend_type': 'unitTson'
         }
     }
+    log.info(f'to_speech id: {reqid}. Request: {tts_request}')
+
     async with aiohttp.ClientSession() as session:
         async with session.post(api_url, headers=header, json=request_json) as response:
             response_data = await response.json()
             if response.status == 200:
                 if 'data' in response_data:
+                    log.info(f'to_speech {reqid} success.')
                     return SuccessResponse(data=TtsResponse(data=response_data['data']))
 
-            log.info(f'openspeech.bytedance tts api wrong. {response_data}')
+            log.info(f'openspeech.bytedance tts {reqid} api wrong. {response_data}')
             return FailResponse(error=json.dumps(response_data))
