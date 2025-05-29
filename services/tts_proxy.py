@@ -8,6 +8,8 @@ from server.response import SuccessResponse, FailResponse
 from utils.log import log
 from utils.security import decrypt
 from utils.config import config
+from aiohttp import ClientError, ClientPayloadError, ClientResponseError
+import asyncio
 
 class TtsRequest(BaseModel):
     voice_type: Optional[str] = None  # 允许空值
@@ -27,6 +29,10 @@ voice_type = 'BV700_V2_streaming'
 emotion = 'professional'
 host = 'openspeech.bytedance.com'
 
+# 配置常量
+MAX_RETRIES = 3  # 最大重试次数
+RETRY_DELAY = 1.0  # 初始重试延迟(秒)，每次重试会指数增加
+TIMEOUT = 30  # 请求超时时间(秒)
 
 async def to_speech(tts_request: TtsRequest):
     text = tts_request.text
@@ -67,13 +73,50 @@ async def to_speech(tts_request: TtsRequest):
     }
     log.info(f'to_speech id: {reqid}. Request: {tts_request}')
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(api_url, headers=header, json=request_json) as response:
-            response_data = await response.json()
-            if response.status == 200:
-                if 'data' in response_data:
-                    log.info(f'to_speech {reqid} success.')
-                    return SuccessResponse(data=TtsResponse(data=response_data['data']))
+    # 重试机制
+    for attempt in range(MAX_RETRIES + 1):  # 尝试次数 = 重试次数 + 1
+        try:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=TIMEOUT)) as session:
+                async with session.post(api_url, headers=header, json=request_json) as response:
+                    # 先读取原始响应，以便错误时记录
+                    raw_response = await response.read()
 
-            log.info(f'openspeech.bytedance tts {reqid} api wrong. {response_data}')
-            return FailResponse(error=json.dumps(response_data))
+                    try:
+                        # 尝试解析JSON
+                        response_data = json.loads(raw_response)
+                    except json.JSONDecodeError:
+                        # JSON解析失败时记录原始响应
+                        log.error(f'TTS {reqid} Invalid JSON response: {raw_response[:200]}...')
+                        response_data = {"error": "Invalid JSON response"}
+
+                    if response.status == 200:
+                        if 'data' in response_data:
+                            log.info(f'TTS {reqid} success')
+                            return SuccessResponse(data=TtsResponse(data=response_data['data']))
+                        else:
+                            log.warning(f'TTS {reqid} missing data field: {response_data}')
+
+                    # 非200状态码或缺少data字段
+                    log.error(f'TTS {reqid} API error (status {response.status}): {response_data}')
+                    return FailResponse(error=json.dumps(response_data))
+
+        except (ClientError, ClientPayloadError, asyncio.TimeoutError) as e:
+            # 可重试的网络错误
+            if attempt < MAX_RETRIES:
+                wait_time = RETRY_DELAY * (2 ** attempt)  # 指数退避
+                log.warning(
+                    f'TTS {reqid} attempt {attempt + 1}/{MAX_RETRIES} failed ({type(e).__name__}), retrying in {wait_time:.1f}s...')
+                await asyncio.sleep(wait_time)
+            else:
+                error_msg = f'TTS {reqid} failed after {MAX_RETRIES} attempts: {str(e)}'
+                log.error(error_msg)
+                return FailResponse(error=error_msg)
+
+        except Exception as e:
+            # 不可预知的错误，不重试
+            error_msg = f'TTS {reqid} unexpected error: {str(e)}'
+            log.error(error_msg, exc_info=True)
+            return FailResponse(error=error_msg)
+
+    # 理论上不会执行到这里，但为了完整性
+    return FailResponse(error=f'TTS {reqid} failed after {MAX_RETRIES} attempts')
