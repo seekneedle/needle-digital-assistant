@@ -108,7 +108,7 @@ async def assistant_trainer_score_new(trainer_score_request: TrainerScoreRequest
 async def tts_endpoint(request: Request, tts_request: TtsRequest):
     log.info(f'/tts incoming request: {tts_request}')
     res = await to_speech(tts_request)
-    # log.info(f'/tts response: {res}')
+    log.info(f'/tts response: {tts_request}')
     return res
 
 # asr 语音转文字，转发
