@@ -125,7 +125,7 @@ async def trainer_score(request: TrainerScoreRequest):
     messages = [{'role': 'user', 'content': content}]
     log.info(f'score(): to call qwen: __{messages}__')
 
-    response = llm.qwen_call(messages, 'json_object', '', 'score', 'qwen-plus')
+    response = await llm.qwen_call(messages, 'json_object', '', 'score', 'qwen-plus')
     log.info(f'__after llm {type(response)} {response}')
     parsed_data = json.loads(response)
     log.info(f'_json: {type(parsed_data)}, {parsed_data}')
