@@ -43,8 +43,7 @@ assistant： 扮演客户
    - 高级难度：强势追问，要求提供解决方案
 
 2. 问题类型权重：
-   - 初级：70%基础问题（价格/行程） + 30%细节问题
-   - 高级：50%复杂问题（竞品对比/定制需求） + 30%突发场景 + 20%售后问题
+   {QUESTIONS}
 
 3. 语气要求：
    - 用词选择（如挑剔型客户使用"你们连这个都做不到？"）
@@ -67,9 +66,10 @@ assistant： 扮演客户
 - 目的地可以是国内外任何城市和景点，请选择一个具体的目的地
 - 尽量模拟国外旅游需求
 - 注意表达时不需要重点介绍人设，特别不要反复提及自己的职业等信息
-- 不要询问历史聊天中已经问过的问题
+- 不要重复提问
+- 不要提问已经被客服回答过的问题
 
-请生成准备旅行的客户的问题："""
+"""
 
     return prompt.strip()
 
@@ -86,7 +86,7 @@ assistant：表示一个旅行客户
 
 
 只需返回true/false，不要解释。
-当前对话（最近3轮）：
+当前对话：
 {recent_dialog}
 """
 
@@ -99,10 +99,7 @@ async def should_terminate(messages: list) -> bool:
             return True
 
         # 智能判断
-        recent_dialog = "\n".join(
-            f"{m['role']}: {m['content']}"
-            for m in messages[-6:]  # 最近3组问答
-        )
+        recent_dialog = messages
 
         client = AsyncOpenAI(
             api_key=decrypt(config['api_key']),
