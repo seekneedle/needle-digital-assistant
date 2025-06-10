@@ -7,6 +7,7 @@ from server.response import SuccessResponse
 from pydantic import BaseModel
 import json
 from utils.log import log
+from datetime import datetime
 
 
 QUESTIONS = [
@@ -29,18 +30,28 @@ def format_questions(questions):
         for q_type, example, weight in questions
     ])
 
+def get_current_date():
+    # 获取当前日期
+    current_date = datetime.now()
+
+    # 按照年月日格式输出
+    formatted_date = current_date.strftime("%Y年%m月%d日")
+
+    return formatted_date
+
 def get_prompt(role):
     # 动态格式化问题列表
     formatted_questions = format_questions(QUESTIONS)
+    current_date = get_current_date()
     
     prompt = f"""
 # 角色指令
 - 你正扮演出境游客户，向众信旅行公司咨询。
 - 请严格遵守：你永远是客户（assistant），绝对不扮演客服（user）。
-- 你能够响应客服的回答。
 - 你的对话内容要符合一个实际的旅行场景。
-- 禁止不考虑客服问题，直接提新的问题。
 - 你需要先了解行程，然后询问价格，之后再根据问题生成规则进行提问。
+- 当前日期是{current_date}，你的需求要符合当前日期，比如冬天不要问夏天的出行问题。
+- 禁止不考虑客服问题，直接提新的问题。
 
 # 客户人设配置
 {role}
