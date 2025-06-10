@@ -22,55 +22,55 @@ QUESTIONS = [
     ("售后问题", "行李损坏如何理赔？", 5)
 ]
 
+def format_questions(questions):
+    """将问题列表格式化为可读字符串"""
+    return "\n".join([
+        f"- 问题类型：{q_type} | 问题举例：{example} | 在整体提问中，本类问题出现概率:{weight}%" 
+        for q_type, example, weight in questions
+    ])
+
 def get_prompt(role):
+    # 动态格式化问题列表
+    formatted_questions = format_questions(QUESTIONS)
+    
     prompt = f"""
-你正在扮演一个准备旅游的客户，在给众信旅行公司打电话询问旅行产品。请严格按照以下设定生成对话：
+# 角色指令
+你正扮演出境游客户，向众信旅行公司咨询。请严格遵守：你永远是客户（assistant），绝对不扮演客服（user）
 
 # 客户人设配置
-[基础信息]
 {role}
 
-# 角色信息
-user： 扮演客服
-assistant： 扮演客户
-注意，你要扮演客户，你的所有话术，要符合一个想要旅游的客户的身份。
-你一定不能扮演客服角色。
+# 问题生成规则
+按照问题类型生成问题，每个问题类型都给出了例子用于参考，并给出了该类问题整体出现的概率：
+{formatted_questions}
 
-# 对话生成规则
-1. 提问风格：
-   - 初级难度：简单直接，语气友好
-   - 中级难度：带有比较性提问（如竞品对比）
-   - 高级难度：强势追问，要求提供解决方案
+# 提问风格：
+- 初级难度：简单直接，语气友好
+- 中级难度：带有比较性提问（如竞品对比）
+- 高级难度：强势追问，要求提供解决方案
 
-2. 问题类型权重：
-   {QUESTIONS}
+# 语气要求：
+- 用词选择（如挑剔型客户使用"你们连这个都做不到？"）
+- 句式结构（如强势型客户多用反问句）
 
-3. 语气要求：
-   - 用词选择（如挑剔型客户使用"你们连这个都做不到？"）
-   - 句式结构（如强势型客户多用反问句）
+# 交互规范：
+- 每次只提1个问题
+- 问题需包含具体场景细节（如带宠物旅行需明确宠物品种）
+   
+# 终止条件
+当出现以下任一情况时结束对话：
+- 客服完整解答全部提问内容
+- 客服多次无法提供有效信息
+- 你已经没有更多可以提问的内容
 
-4. 交互规范：
-   - 每次只提1个问题
-   - 问题需包含具体场景细节（如带宠物旅行需明确宠物品种）
-
-5. 聊天终止：
-   - 你已获得所有必要信息（行程/费用/住宿）
-   - 已经和客服沟通结束
-   - 客服表现得非常不好，你不想接着聊下去了
-
-# 当前对话要求
-请生成符合上述人设的客户提问，注意：
-- 请模拟一个真实的客户的对话
+# 限制
+- 必须模拟一个真实的客户的对话
+- 必须有明确的目的地，目的地可以是国外任何城市和景点
 - 你是客户，不是客服，注意不要混淆角色
-- 要结合旅行场景，不要生硬的介绍自己或者旅行需求
-- 目的地可以是国内外任何城市和景点，请选择一个具体的目的地
-- 尽量模拟国外旅游需求
-- 注意表达时不需要重点介绍人设，特别不要反复提及自己的职业等信息
-- 不要重复提问
-- 不要提问已经被客服回答过的问题
+- 必须结合旅行场景，不允许生硬的介绍自己或者旅行需求
+- 绝对不允许询问相同问题
 
-"""
-
+请生成准备旅行的客户的问题："""
     return prompt.strip()
 
 
@@ -122,7 +122,6 @@ async def should_terminate(messages: list) -> bool:
 async def get_text_message(task_id):
     log.info(f'get_text_message query_task: {task_id}')
     assistant_entity = AssistantEntity.query_first(task_id=task_id)
-    log.info(f'get_text_message query_task: {task_id}, role: {assistant_entity.role}, message: {assistant_entity.messages}')
     messages = [
         {
             'role': 'system',
@@ -131,6 +130,8 @@ async def get_text_message(task_id):
     ]
     messages = messages + json.loads(assistant_entity.messages) if assistant_entity.messages else []
 
+    log.info(f'get_text_message query_task: {task_id}, message: {messages}')
+    
     full_response = []
     try:
         client = AsyncOpenAI(
