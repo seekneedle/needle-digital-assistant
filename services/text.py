@@ -191,6 +191,7 @@ async def get_text_message(task_id):
             messages.append({"role": "assistant", "content": assistant_response})
 
             if await should_terminate(messages):
+                log.info(f'get_text_message end task: {task_id}')
                 yield "[END]"
 
     finally:
