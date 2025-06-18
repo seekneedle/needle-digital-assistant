@@ -52,7 +52,9 @@ DEFAULT_CONFIG = {
     "cluster": "volcengine_streaming_common",
     "workflow": "audio_in,resample,partition,vad,fe,decode,itn,nlu_punctuate",
     "language": "zh-CN",
-    "sample_rate": 16000
+    "sample_rate": 16000,
+    "boosting_table_name": "zhongxin",
+    "correct_table_name": "zhongxin"
 }
 
 def parse_response(res):
@@ -222,6 +224,8 @@ def auth_manipulation(message):
                 if isinstance(payload_json, dict):
                     payload_json['app']['appid'] = DEFAULT_CONFIG['appid']
                     payload_json['app']['cluster'] = DEFAULT_CONFIG['cluster']
+                    payload_json['request']['boosting_table_name'] = DEFAULT_CONFIG['boosting_table_name']
+                    payload_json['request']['correct_table_name'] = DEFAULT_CONFIG['correct_table_name']
                     # payload_json['app']['token'] = DEFAULT_CONFIG['token']
                     shipped_token = payload_json['app']['token']
                     asr_auth_token = decrypt(config['asr_auth_token'])
